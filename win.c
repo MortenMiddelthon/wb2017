@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include <ncurses.h>
 #include <string.h>
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
+void update_main(WINDOW *win, int max_col, int max_row);
 
 void destroy_win(WINDOW *local_win);
 
@@ -29,8 +31,10 @@ int main() {
 	main_window = create_newwin(row, col*0.7, 0,0);
 	side_window = create_newwin(row, col*0.3, 0, (col*0.7)+1);
 
-	print_in_window(main_window, 1, 1, 20, "Elgbert ruler!!!");
-	print_in_window(side_window, 1, 1, 20, "Suppe");
+	print_in_window(main_window, 1, 2, 20, "Elgbert ruler!!!");
+	print_in_window(side_window, 1, 2, 20, "Suppe");
+	getch();
+	update_main(main_window, col*0.7 - 10, row-5 );
 	getch();
 	endwin();			/* End curses mode		  */
 	return 0;
@@ -67,7 +71,22 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 
 	length = strlen(string);
 	temp = (width - length)/ 2;
-	x = startx + (int)temp;
+//	x = startx + (int)temp;
 	mvwprintw(win, y, x, "%s", string);
+	box(win, 0, 0);
 	wrefresh(win);
+}
+
+void update_main(WINDOW *win, int max_col, int max_row) {
+	char command[] = "/bin/ps -e";
+	char read_line[max_col - 4];
+	int count;
+	FILE *output;
+	output = popen(command, "r");
+	count = 0;
+	while( fgets(read_line, sizeof(read_line), output) != NULL && count < max_row-5) {
+		print_in_window(win, count+3, 2, 0, read_line);
+		count++;
+	}
+	pclose(output);
 }
