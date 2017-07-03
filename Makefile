@@ -1,6 +1,12 @@
 LIBS=-lncurses
 FLAGS=
-PROG=EHLO
+PROG=win
 
-ehlo:
+win:
 	gcc ${PROG}.c -o ${PROG} ${LIBS} ${FLAGS}
+
+clean:
+	rm ${PROG}
+
+run:
+	./${PROG}
