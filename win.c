@@ -34,7 +34,7 @@ int main() {
 	print_in_window(main_window, 1, 2, 20, "Elgbert ruler!!!");
 	print_in_window(side_window, 1, 2, 20, "Suppe");
 	getch();
-	update_main(main_window, col*0.7 - 10, row-5 );
+	update_main(main_window, col*0.7 - 10, row );
 	getch();
 	endwin();			/* End curses mode		  */
 	return 0;
@@ -83,46 +83,46 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 	int count;
 	size_t len = 0;
 	char *jsonString = NULL;
-	char *rating = NULL;
-	char *beer_name = NULL;
-	char *user_name = NULL;
-	char *brewery = NULL;
-	char *date = NULL;
-	char *comment = NULL;
-	char *outputString = NULL;
+	enum json_type type;
 	FILE *output;
 
 	output = popen(command, "r");
 	count = 0;
-	while( getline(&jsonString, &len, output) != -1 && count < max_row-5) {
+	while( getline(&jsonString, &len, output) != -1 && count < max_row-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		if(jobj != NULL) {
 			enum json_type type;
+			char outputString[400];
+			char *username = NULL;
+			char *beer = NULL;
+			char *brewery = NULL;
+			char *comment = NULL;
+			char *rating = NULL;
 			json_object_object_foreach(jobj, key, val) {
-				rating = NULL;
-				user_name = NULL;
-				beer_name = NULL;
-				brewery = NULL;
-				comment = NULL;
-				if(strcmp(key, "rating")) {
-					strcpy(rating, json_object_get_string(val));
+				if(!strcmp("user_name", key)) {
+					username = json_object_get_string(val);
 				}
-				else if(strcmp(key, "user_name")) {
-					strcpy(user_name, json_object_get_string(val));
+				else if(!strcmp("beer_name", key)) {
+					beer = json_object_get_string(val);
 				}
-				else if(strcmp(key, "beer_name")) {
-					strcpy(beer_name, json_object_get_string(val));
+				else if(!strcmp("brewery_name", key)) {
+					brewery = json_object_get_string(val);
 				}
-				else if(strcmp(key, "brewery_name")) {
-					strcpy(brewery, json_object_get_string(val));
+				else if(!strcmp("checkin_comment", key)) {
+					comment = json_object_get_string(val);
 				}
-				else if(strcmp(key, "checkin_comment")) {
-					strcpy(comment, json_object_get_string(val));
+				else if(!strcmp("rating", key)) {
+					rating = json_object_get_string(val);
 				}
 			}
-			//sprintf(outputString, "%s rated %s by %s: %s\n", user_name, beer_name, brewery, rating);
-			//print_in_window(win, count+3, 2, 0, outputString);
+			sprintf(outputString, "User %s rated %s by %s: %s", username, beer, brewery, rating);
+			print_in_window(win, count, 2, 0, outputString);
 			count++;
+			if(strlen(comment) > 0) {
+				sprintf(outputString, "\t\"%s\"", comment);
+				print_in_window(win, count, 2, 0, outputString);
+				count++;
+			}
 		}
 	}
 	pclose(output);
