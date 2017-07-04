@@ -2,6 +2,7 @@
 #include <ncurses.h>
 #include <string.h>
 #include <json-c/json.h>
+#include <unistd.h>
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
@@ -17,7 +18,7 @@ int main() {
 	initscr();			/* Start curses mode 		*/
 	start_color();
 	cbreak();
-	curs_set(0);
+//	curs_set(0);
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 	getmaxyx(stdscr, row, col);
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
@@ -29,13 +30,12 @@ int main() {
 	startx = (COLS - width) / 2;	/* of the window		*/
 	refresh();
 	main_window = create_newwin(row, col*0.7, 0,0);
-	side_window = create_newwin(row, col*0.3, 0, (col*0.7)+1);
-
-	print_in_window(main_window, 1, 2, 20, "Elgbert ruler!!!");
+	side_window = create_newwin(row, col*0.3-1, 0, (col*0.7)+1);
 	print_in_window(side_window, 1, 2, 20, "Suppe");
-	getch();
-	update_main(main_window, col*0.7 - 10, row );
-	getch();
+	do {
+		update_main(main_window, col*0.7-1, row );
+		ch = getch();
+	} while(ch != 'x');
 	endwin();			/* End curses mode		  */
 	return 0;
 }
@@ -69,9 +69,11 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 	if(width == 0)
 		width = 80;
 
+	/*
 	length = strlen(string);
 	temp = (width - length)/ 2;
-//	x = startx + (int)temp;
+	x = startx + (int)temp;
+	*/
 	mvwprintw(win, y, x, "%s", string);
 	box(win, 0, 0);
 	wrefresh(win);
@@ -88,7 +90,8 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 
 	output = popen(command, "r");
 	count = 1;
-	while( getline(&jsonString, &len, output) != -1 && count < max_row-4) {
+	wclear(win);
+	while( getline(&jsonString, &len, output) != -1 && count < max_row-2) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		if(jobj != NULL) {
 			enum json_type type;
@@ -117,13 +120,18 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 			}
 			sprintf(outputString, "User %s rated %s by %s: %s", username, beer, brewery, rating);
 			print_in_window(win, count, 2, 0, outputString);
+			if(strlen(outputString) > max_col-1 ) {
+				count++;
+			}
 			count++;
 			if(strlen(comment) > 0) {
 				sprintf(outputString, "\t\"%s\"", comment);
 				print_in_window(win, count, 2, 0, outputString);
 				count++;
 			}
+			usleep(100000);
 		}
 	}
+	print_in_window(win, count, 2, 0, "......");
 	pclose(output);
 }
