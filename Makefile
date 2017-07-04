@@ -1,4 +1,4 @@
-LIBS=-lncurses
+LIBS=-lncurses -ljson-c
 FLAGS=
 PROG=win
 

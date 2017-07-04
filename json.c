@@ -1,35 +1,44 @@
 #include <json-c/json.h>
 #include <stdio.h>
 
+void json_parse(json_object * jobj);
+
 int main() {
-	FILE *json;
+	FILE *jsonInput;
+	int counter = 0;
+	size_t len = 0;
 	char filename[] = "checkins.json";
-	char json_string[255];
-	json = fopen(filename, "r");
-	while( fgets(json_string, sizeof(json_string), json) != NULL ) {
+	char *jsonString = NULL;
+	jsonInput = fopen(filename, "r");
+	while( getline(&jsonString, &len, jsonInput) != -1 ) {
 	//	printf("%s\n", json_string);
-		json_object * jobj = json_tokener_parse(json_string);
-		enum json_type type;
+		json_object * jobj = json_tokener_parse(jsonString);
+		counter++;
+		if(jobj != NULL) {
+			json_parse(jobj);
+		}
+		else {
+			printf("Problem at line %d\n", counter);
+			printf("#######\n");
+			printf("%s\n", jsonString);
+			printf("#######\n");
+		}
+		/*
 		json_object_object_foreach(jobj, key, val) {
-			printf("type: ",type);
-			type = json_object_get_type(val);
-			switch (type) {
-				case json_type_null: printf("json_type_null\n");
-				break;
-				case json_type_boolean: printf("json_type_boolean\n");
-				break;
-				case json_type_double: printf("json_type_double\n");
-				break;
-				case json_type_int: printf("json_type_int\n");
-				break;
-				case json_type_object: printf("json_type_object\n");
-				break;
-				case json_type_array: printf("json_type_array\n");
-				break;
-				case json_type_string: printf("json_type_string\n");
-				break;
-			}
+		}
+		*/
+	}
+	fclose(jsonInput);
+}
+
+void json_parse(json_object * jobj) {
+	enum json_type type;
+	json_object_object_foreach(jobj, key, val) {
+		type = json_object_get_type(val);
+		switch (type) {
+			case json_type_string: printf("key: %s, ", key);
+			printf("value: %s\n", json_object_get_string(val));
+			break;
 		}
 	}
-	fclose(json);
 }

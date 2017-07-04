@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <ncurses.h>
 #include <string.h>
+#include <json-c/json.h>
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
 void update_main(WINDOW *win, int max_col, int max_row);
-
 void destroy_win(WINDOW *local_win);
 
 int main() {
@@ -78,15 +78,52 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 }
 
 void update_main(WINDOW *win, int max_col, int max_row) {
-	char command[] = "/bin/ps -e";
+	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
 	char read_line[max_col - 4];
 	int count;
+	size_t len = 0;
+	char *jsonString = NULL;
+	char *rating = NULL;
+	char *beer_name = NULL;
+	char *user_name = NULL;
+	char *brewery = NULL;
+	char *date = NULL;
+	char *comment = NULL;
+	char *outputString = NULL;
 	FILE *output;
+
 	output = popen(command, "r");
 	count = 0;
-	while( fgets(read_line, sizeof(read_line), output) != NULL && count < max_row-5) {
-		print_in_window(win, count+3, 2, 0, read_line);
-		count++;
+	while( getline(&jsonString, &len, output) != -1 && count < max_row-5) {
+		json_object * jobj = json_tokener_parse(jsonString);
+		if(jobj != NULL) {
+			enum json_type type;
+			json_object_object_foreach(jobj, key, val) {
+				rating = NULL;
+				user_name = NULL;
+				beer_name = NULL;
+				brewery = NULL;
+				comment = NULL;
+				if(strcmp(key, "rating")) {
+					strcpy(rating, json_object_get_string(val));
+				}
+				else if(strcmp(key, "user_name")) {
+					strcpy(user_name, json_object_get_string(val));
+				}
+				else if(strcmp(key, "beer_name")) {
+					strcpy(beer_name, json_object_get_string(val));
+				}
+				else if(strcmp(key, "brewery_name")) {
+					strcpy(brewery, json_object_get_string(val));
+				}
+				else if(strcmp(key, "checkin_comment")) {
+					strcpy(comment, json_object_get_string(val));
+				}
+			}
+			//sprintf(outputString, "%s rated %s by %s: %s\n", user_name, beer_name, brewery, rating);
+			//print_in_window(win, count+3, 2, 0, outputString);
+			count++;
+		}
 	}
 	pclose(output);
 }
