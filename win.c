@@ -87,7 +87,7 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 	FILE *output;
 
 	output = popen(command, "r");
-	count = 0;
+	count = 1;
 	while( getline(&jsonString, &len, output) != -1 && count < max_row-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		if(jobj != NULL) {
