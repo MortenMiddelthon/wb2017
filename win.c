@@ -1,5 +1,4 @@
 #include <stdio.h>
-// #include <ncurses.h>
 #include <ncursesw/curses.h>
 #include <string.h>
 #include <json-c/json.h>
@@ -30,21 +29,14 @@ int main() {
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	attron(A_BOLD | COLOR_PAIR(1));
 
-	height = 3;
-	width = 10;
-	starty = (LINES - height) / 2;	/* Calculating for a center placement */
-	startx = (COLS - width) / 2;	/* of the window		*/
 	refresh();
 	main_window = create_newwin(row, col*0.7, 0,0);
 	side_window = create_newwin(row, col*0.3-1, 0, (col*0.7)+1);
 	print_in_window(side_window, 1, 2, 20, "Suppe");
-	/*
-	do {
-		update_main(main_window, col*0.7-1, row );
-		ch = getch();
-	} while(ch != 'x');
-	*/
-	fetch_updates_main(main_window);
+	while(1) {
+		fetch_updates_main(main_window);
+		sleep(10);
+	}
 	getch();
 	endwin();			/* End curses mode		  */
 	return 0;
@@ -110,7 +102,7 @@ void fetch_updates_main(WINDOW *win) {
 
 	output = popen(command, "r"); // Read from command pipe
 
-	// wclear(win); // Clear text from window
+	wclear(win); // Clear text from window
 
 	// Read JSON output one line at a time
 	line_count = 1;
