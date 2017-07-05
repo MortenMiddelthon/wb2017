@@ -1,12 +1,14 @@
 #include <stdio.h>
-#include <ncurses.h>
+// #include <ncurses.h>
+#include <ncursesw/curses.h>
 #include <string.h>
 #include <json-c/json.h>
 #include <unistd.h>
+#include <locale.h>
+#include <wchar.h>
 
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
-void update_main(WINDOW *win, int max_col, int max_row);
 void destroy_win(WINDOW *local_win);
 void fetch_updates_main(WINDOW *win);
 
@@ -15,6 +17,8 @@ int main() {
 	WINDOW *side_window;
 	int startx, starty, width, height;
 	int ch, row, col;
+	char *locale;
+	locale = setlocale(LC_ALL, "");
 
 	initscr();			/* Start curses mode 		*/
 	start_color();
@@ -85,62 +89,6 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 	wrefresh(win);
 }
 
-void update_main(WINDOW *win, int max_col, int max_row) {
-	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
-	int count;
-	size_t len = 0;
-	char *jsonString = NULL;
-	enum json_type type;
-	FILE *output;
-
-	output = popen(command, "r");
-	count = 1;
-	wclear(win);
-	while( getline(&jsonString, &len, output) != -1 && count < max_row-2) {
-		json_object * jobj = json_tokener_parse(jsonString);
-		if(jobj != NULL) {
-			enum json_type type;
-			char outputString[400];
-			char *username = NULL;
-			char *beer = NULL;
-			char *brewery = NULL;
-			char *comment = NULL;
-			char *rating = NULL;
-			json_object_object_foreach(jobj, key, val) {
-				if(!strcmp("user_name", key)) {
-					username = json_object_get_string(val);
-				}
-				else if(!strcmp("beer_name", key)) {
-					beer = json_object_get_string(val);
-				}
-				else if(!strcmp("brewery_name", key)) {
-					brewery = json_object_get_string(val);
-				}
-				else if(!strcmp("checkin_comment", key)) {
-					comment = json_object_get_string(val);
-				}
-				else if(!strcmp("rating", key)) {
-					rating = json_object_get_string(val);
-				}
-			}
-			sprintf(outputString, "User %s rated %s by %s: %s", username, beer, brewery, rating);
-			print_in_window(win, count, 2, 0, outputString);
-			if(strlen(outputString) > max_col-1 ) {
-				count++;
-			}
-			count++;
-			if(strlen(comment) > 0) {
-				sprintf(outputString, "\t\"%s\"", comment);
-				print_in_window(win, count, 2, 0, outputString);
-				count++;
-			}
-			usleep(100000);
-		}
-	}
-	print_in_window(win, count, 2, 0, "......");
-	pclose(output);
-}
-
 void fetch_updates_main(WINDOW *win) {
 	int x, y, c, line_count;
 	int delay = 10000; // Delay between printing each character
@@ -177,6 +125,7 @@ void fetch_updates_main(WINDOW *win) {
 			char *brewery = NULL;
 			char *comment = NULL;
 			char *rating = NULL;
+			char *date = NULL;
 			// Set checkin variables from JSON objects
 			json_object_object_foreach(jobj, key, val) {
 				if(!strcmp("user_name", key)) {
@@ -194,10 +143,19 @@ void fetch_updates_main(WINDOW *win) {
 				else if(!strcmp("rating", key)) {
 					rating = json_object_get_string(val);
 				}
+				else if(!strcmp("date", key)) {
+					date = json_object_get_string(val);
+				}
 			}
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
 			mvwaddch(win, line_count,1, ' ');
 			wattroff(win, A_BOLD);
+			for(c = 0; c < strlen(date); c++) {
+				waddch(win, date[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			waddch(win, ' '); usleep(delay); wrefresh(win);
 			waddch(win, 'U'); usleep(delay); wrefresh(win);
 			waddch(win, 's'); usleep(delay); wrefresh(win);
 			waddch(win, 'e'); usleep(delay); wrefresh(win); 
@@ -219,11 +177,14 @@ void fetch_updates_main(WINDOW *win) {
 			waddch(win, ' '); usleep(delay); wrefresh(win);
 
 			wattron(win, A_BOLD);
+			/*
 			for(c = 0; c < strlen(beer); c++) {
 				waddch(win, beer[c]);
 				usleep(delay);
 				wrefresh(win);
 			}
+			*/
+			waddstr(win, beer); usleep(delay); wrefresh(win);
 			wattroff(win, A_BOLD);
 			waddch(win, ' '); usleep(delay); wrefresh(win);
 			waddch(win, 'b'); usleep(delay); wrefresh(win);
@@ -231,11 +192,14 @@ void fetch_updates_main(WINDOW *win) {
 			waddch(win, ' '); usleep(delay); wrefresh(win);
 
 			wattron(win, A_BOLD);
+			/*
 			for(c = 0; c < strlen(brewery); c++) {
 				waddch(win, brewery[c]);
 				usleep(delay);
 				wrefresh(win);
 			}
+			*/
+			waddstr(win, brewery); usleep(delay); wrefresh(win);
 			waddch(win, ' '); usleep(delay); wrefresh(win);
 			for(c = 0; c < strlen(rating); c++) {
 				waddch(win, rating[c]);
@@ -247,11 +211,14 @@ void fetch_updates_main(WINDOW *win) {
 				waddch(win, '\n'); usleep(delay); wrefresh(win);
 				waddch(win, '\t'); usleep(delay); wrefresh(win);
 				waddch(win, '"'); usleep(delay); wrefresh(win);
+				/*
 				for(c = 0; c < strlen(comment); c++) {
 					waddch(win, comment[c]);
 					usleep(delay);
 					wrefresh(win);
 				}
+				*/
+				waddstr(win, comment); usleep(delay); wrefresh(win);
 				waddch(win, '"'); usleep(delay); wrefresh(win);
 				line_count++;
 			}

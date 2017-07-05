@@ -1,5 +1,5 @@
 CC=gcc
-LIBS=-lncurses -ljson-c
+LIBS=-lncursesw -ljson-c
 CFLAGS=
 OBJ=win.o
 PROG=win
