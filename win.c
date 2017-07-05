@@ -8,6 +8,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
 void update_main(WINDOW *win, int max_col, int max_row);
 void destroy_win(WINDOW *local_win);
+void fetch_updates_main(WINDOW *win);
 
 int main() {
 	WINDOW *main_window;
@@ -32,10 +33,14 @@ int main() {
 	main_window = create_newwin(row, col*0.7, 0,0);
 	side_window = create_newwin(row, col*0.3-1, 0, (col*0.7)+1);
 	print_in_window(side_window, 1, 2, 20, "Suppe");
+	/*
 	do {
 		update_main(main_window, col*0.7-1, row );
 		ch = getch();
 	} while(ch != 'x');
+	*/
+	fetch_updates_main(main_window);
+	getch();
 	endwin();			/* End curses mode		  */
 	return 0;
 }
@@ -81,7 +86,6 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 
 void update_main(WINDOW *win, int max_col, int max_row) {
 	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
-	char read_line[max_col - 4];
 	int count;
 	size_t len = 0;
 	char *jsonString = NULL;
@@ -134,4 +138,33 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 	}
 	print_in_window(win, count, 2, 0, "......");
 	pclose(output);
+}
+
+void fetch_updates_main(WINDOW *win) {
+	int x, y, c, line_count;
+	// Where to fetch JSON
+	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
+	char testString[] = "This is a long string we want to print each character at a time....";
+	size_t len = 0;
+	char *jsonString = NULL;
+	enum json_type type;
+	FILE *output;
+
+	// Set colours and font type
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	wattron(win, COLOR_PAIR(1));
+	box(win, 0, 0);
+
+	// Get window dimensions
+	getmaxyx(win, y , x);
+
+	// mvwprintw(win, y, x, "%s", string);
+	mvwaddch(win, 1, 1, ' ');
+	for(c = 0; c < strlen(testString); c++) {
+		waddch(win, testString[c]);
+		usleep(50000);
+		wrefresh(win);
+	}
+//	box(win, 0, 0);
+	wrefresh(win);
 }
