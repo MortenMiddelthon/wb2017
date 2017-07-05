@@ -1,8 +1,13 @@
+CC=gcc
 LIBS=-lncurses -ljson-c
-FLAGS=
+CFLAGS=
+OBJ=win.o
 PROG=win
 
-win:
+%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+win: ${OBJ}
 	gcc ${PROG}.c -o ${PROG} ${LIBS} ${FLAGS}
 
 clean:

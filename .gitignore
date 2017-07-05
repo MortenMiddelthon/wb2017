@@ -1,4 +1,5 @@
 menu
 win
+win.o
 EHLO
 .*swp
