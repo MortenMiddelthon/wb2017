@@ -19,7 +19,8 @@ int main() {
 	initscr();			/* Start curses mode 		*/
 	start_color();
 	cbreak();
-//	curs_set(0);
+	noecho();
+	curs_set(1);
 	keypad(stdscr, TRUE);		/* I need that nifty F1 	*/
 	getmaxyx(stdscr, row, col);
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
@@ -142,6 +143,7 @@ void update_main(WINDOW *win, int max_col, int max_row) {
 
 void fetch_updates_main(WINDOW *win) {
 	int x, y, c, line_count;
+	int delay = 10000; // Delay between printing each character
 	// Where to fetch JSON
 	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
 	char testString[] = "This is a long string we want to print each character at a time....";
@@ -153,18 +155,125 @@ void fetch_updates_main(WINDOW *win) {
 	// Set colours and font type
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
-	box(win, 0, 0);
+	box(win, 0, 0); // Redraw window border with correct colour
 
 	// Get window dimensions
 	getmaxyx(win, y , x);
 
-	// mvwprintw(win, y, x, "%s", string);
-	mvwaddch(win, 1, 1, ' ');
+	output = popen(command, "r"); // Read from command pipe
+
+	// wclear(win); // Clear text from window
+
+	// Read JSON output one line at a time
+	line_count = 1;
+	while( getline(&jsonString, &len, output) != -1 && line_count < y-4) {
+		json_object * jobj = json_tokener_parse(jsonString);
+		// Check if we have valid JSON objects before proceding
+		if(jobj != NULL) {
+			enum json_type type;
+			char outputString[400];
+			char *username = NULL;
+			char *beer = NULL;
+			char *brewery = NULL;
+			char *comment = NULL;
+			char *rating = NULL;
+			// Set checkin variables from JSON objects
+			json_object_object_foreach(jobj, key, val) {
+				if(!strcmp("user_name", key)) {
+					username = json_object_get_string(val);
+				}
+				else if(!strcmp("beer_name", key)) {
+					beer = json_object_get_string(val);
+				}
+				else if(!strcmp("brewery_name", key)) {
+					brewery = json_object_get_string(val);
+				}
+				else if(!strcmp("checkin_comment", key)) {
+					comment = json_object_get_string(val);
+				}
+				else if(!strcmp("rating", key)) {
+					rating = json_object_get_string(val);
+				}
+			}
+			// wattron(win, A_BOLD | COLOR_PAIR(1));
+			mvwaddch(win, line_count,1, ' ');
+			wattroff(win, A_BOLD);
+			waddch(win, 'U'); usleep(delay); wrefresh(win);
+			waddch(win, 's'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			waddch(win, 'r'); usleep(delay); wrefresh(win); 
+			waddch(win, ' '); usleep(delay); wrefresh(win); 
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(username); c++) {
+				waddch(win, username[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			wattroff(win, A_BOLD);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 't'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, 'd'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(beer); c++) {
+				waddch(win, beer[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			wattroff(win, A_BOLD);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+			waddch(win, 'b'); usleep(delay); wrefresh(win);
+			waddch(win, 'y'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(brewery); c++) {
+				waddch(win, brewery[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+			for(c = 0; c < strlen(rating); c++) {
+				waddch(win, rating[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			wattroff(win, A_BOLD);
+			if(strlen(comment) > 0) {
+				waddch(win, '\n'); usleep(delay); wrefresh(win);
+				waddch(win, '\t'); usleep(delay); wrefresh(win);
+				waddch(win, '"'); usleep(delay); wrefresh(win);
+				for(c = 0; c < strlen(comment); c++) {
+					waddch(win, comment[c]);
+					usleep(delay);
+					wrefresh(win);
+				}
+				waddch(win, '"'); usleep(delay); wrefresh(win);
+				line_count++;
+			}
+			// End line
+			waddch(win, '\n');
+			box(win, 0, 0); // Redraw window border with correct colour
+			wrefresh(win);
+			line_count++;
+
+		}
+	}
+	/*
 	for(c = 0; c < strlen(testString); c++) {
 		waddch(win, testString[c]);
 		usleep(50000);
 		wrefresh(win);
 	}
-//	box(win, 0, 0);
-	wrefresh(win);
+	*/
+	mvwaddch(win, line_count,2, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddstr(win, " Ready "); wrefresh(win);
 }
