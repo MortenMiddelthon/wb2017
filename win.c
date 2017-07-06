@@ -203,6 +203,21 @@ void fetch_updates_main(WINDOW *win) {
 				waddch(win, '\n'); usleep(delay); wrefresh(win);
 				waddch(win, '\t'); usleep(delay); wrefresh(win);
 				waddch(win, '"'); usleep(delay); wrefresh(win);
+				if(strlen(comment) > 30) {
+					char shortComment[40];
+					strncpy(shortComment, comment, 15);
+					waddstr(win, shortComment); usleep(delay); wrefresh(win);
+					waddch(win, '.'); usleep(delay); wrefresh(win);
+					waddch(win, '.'); usleep(delay); wrefresh(win);
+					waddch(win, '.'); usleep(delay); wrefresh(win);
+					waddch(win, '"'); usleep(delay); wrefresh(win);
+					waddstr(win, " yada yada."); usleep(delay); wrefresh(win);
+
+				}
+				else {
+					waddstr(win, comment); usleep(delay); wrefresh(win);
+					waddch(win, '"'); usleep(delay); wrefresh(win);
+				}
 				/*
 				for(c = 0; c < strlen(comment); c++) {
 					waddch(win, comment[c]);
@@ -210,8 +225,6 @@ void fetch_updates_main(WINDOW *win) {
 					wrefresh(win);
 				}
 				*/
-				waddstr(win, comment); usleep(delay); wrefresh(win);
-				waddch(win, '"'); usleep(delay); wrefresh(win);
 				line_count++;
 			}
 			// End line
