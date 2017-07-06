@@ -14,7 +14,6 @@ void fetch_updates_main(WINDOW *win);
 int main() {
 	WINDOW *main_window;
 	WINDOW *side_window;
-	int startx, starty, width, height;
 	int ch, row, col;
 	char *locale;
 	locale = setlocale(LC_ALL, "");
@@ -86,7 +85,6 @@ void fetch_updates_main(WINDOW *win) {
 	int delay = 10000; // Delay between printing each character
 	// Where to fetch JSON
 	char command[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/checkins";
-	char testString[] = "This is a long string we want to print each character at a time....";
 	size_t len = 0;
 	char *jsonString = NULL;
 	enum json_type type;
