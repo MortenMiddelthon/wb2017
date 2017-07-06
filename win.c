@@ -104,6 +104,7 @@ void fetch_updates_main(WINDOW *win) {
 
 	// Read JSON output one line at a time
 	line_count = 1;
+	mvwaddch(win, 1,1, ' ');
 	while( getline(&jsonString, &len, output) != -1 && line_count < y-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		// Check if we have valid JSON objects before proceding
@@ -138,7 +139,7 @@ void fetch_updates_main(WINDOW *win) {
 				}
 			}
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
-			mvwaddch(win, line_count,1, ' ');
+			mvwaddch(win, getcury(win),1, ' ');
 			wattroff(win, A_BOLD);
 			for(c = 0; c < strlen(date); c++) {
 				waddch(win, date[c]);
