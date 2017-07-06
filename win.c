@@ -196,7 +196,7 @@ void fetch_updates_main(WINDOW *win) {
 				usleep(delay);
 				wrefresh(win);
 			}
-			if((strlen(beer)+strlen(brewery)+36) > x) {
+			if((strlen(beer)+strlen(brewery)+40) > x) {
 				line_count++;
 			}
 			wattroff(win, A_BOLD);
