@@ -175,7 +175,10 @@ void fetch_updates_main(WINDOW *win) {
 			}
 			*/
 			if((strlen(beer)+strlen(brewery)+40) > x) {
-				waddnstr(win, beer, 7); usleep(delay); wrefresh(win);
+				waddnstr(win, beer, 10); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
 			}
 			else {
 				waddstr(win, beer); usleep(delay); wrefresh(win);
@@ -195,7 +198,10 @@ void fetch_updates_main(WINDOW *win) {
 			}
 			*/
 			if((strlen(beer)+strlen(brewery)+40) > x) {
-				waddnstr(win, brewery, 10); usleep(delay); wrefresh(win);
+				waddnstr(win, brewery, 15); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
+				waddch(win, '.'); usleep(delay); wrefresh(win);
 			}
 			else {
 				waddstr(win, brewery); usleep(delay); wrefresh(win);
