@@ -203,10 +203,8 @@ void fetch_updates_main(WINDOW *win) {
 				waddch(win, '\n'); usleep(delay); wrefresh(win);
 				waddch(win, '\t'); usleep(delay); wrefresh(win);
 				waddch(win, '"'); usleep(delay); wrefresh(win);
-				if(strlen(comment) > 30) {
-					char shortComment[40];
-					strncpy(shortComment, comment, 15);
-					waddstr(win, shortComment); usleep(delay); wrefresh(win);
+				if(strlen(comment) > 50) {
+					waddnstr(win, comment, 30); usleep(delay); wrefresh(win);
 					waddch(win, '.'); usleep(delay); wrefresh(win);
 					waddch(win, '.'); usleep(delay); wrefresh(win);
 					waddch(win, '.'); usleep(delay); wrefresh(win);
