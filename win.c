@@ -105,7 +105,7 @@ void fetch_updates_main(WINDOW *win) {
 	// Read JSON output one line at a time
 	line_count = 1;
 	mvwaddch(win, 1,1, ' ');
-	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-2) {
+	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		// Check if we have valid JSON objects before proceding
 		if(jobj != NULL) {
