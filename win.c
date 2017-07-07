@@ -10,6 +10,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
 void destroy_win(WINDOW *local_win);
 void fetch_updates_main(WINDOW *win);
+void fetch_updates_side(WINDOW *win);
 
 int main() {
 	WINDOW *main_window;
@@ -34,6 +35,8 @@ int main() {
 	print_in_window(side_window, 1, 2, 20, "Suppe");
 	while(1) {
 		fetch_updates_main(main_window);
+		sleep(1);
+		fetch_updates_side(side_window);
 		sleep(10);
 	}
 	getch();
@@ -249,4 +252,207 @@ void fetch_updates_main(WINDOW *win) {
 	waddch(win, '.'); usleep(delay); wrefresh(win);
 	waddch(win, '.'); usleep(delay); wrefresh(win);
 	waddstr(win, " Ready "); wrefresh(win);
+	pclose(output);
+}
+
+void fetch_updates_side(WINDOW *win) {
+	int x, y, c, line_count;
+	int delay = 10000; // Delay between printing each character
+	// Where to fetch JSON
+	char beers[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/topbeers";
+	char breweries[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/topbreweries";
+	size_t len = 0;
+	char *jsonString = NULL;
+	enum json_type type;
+	FILE *output;
+
+	// Set colours and font type
+	init_pair(1, COLOR_GREEN, COLOR_BLACK);
+	wattron(win, COLOR_PAIR(1));
+	box(win, 0, 0); // Redraw window border with correct colour
+
+	// Get window dimensions
+	getmaxyx(win, y , x);
+
+	output = popen(beers, "r"); // Read from command pipe
+
+	wclear(win); // Clear text from window
+
+	// Read JSON output one line at a time
+	line_count = 1;
+	mvwaddstr(win, 1,1, "Top 5 beers: \n");
+	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
+		json_object * jobj = json_tokener_parse(jsonString);
+		// Check if we have valid JSON objects before proceding
+		if(jobj != NULL) {
+			enum json_type type;
+			char outputString[400];
+			char *beer = NULL;
+			char *average = NULL;
+			char *ratings = NULL;
+			// Set checkin variables from JSON objects
+			json_object_object_foreach(jobj, key, val) {
+				if(!strcmp("beer", key)) {
+					beer = json_object_get_string(val);
+				}
+				else if(!strcmp("average", key)) {
+					average = json_object_get_string(val);
+				}
+				else if(!strcmp("ratings", key)) {
+					ratings = json_object_get_string(val);
+				}
+			}
+			// wattron(win, A_BOLD | COLOR_PAIR(1));
+			mvwaddch(win, getcury(win),1, ' ');
+			wattroff(win, A_BOLD);
+			waddch(win, 'B'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			waddch(win, 'r'); usleep(delay); wrefresh(win); 
+			waddch(win, ' '); usleep(delay); wrefresh(win); 
+			wattron(win, A_BOLD);
+			waddstr(win, beer); usleep(delay); wrefresh(win);
+			wattroff(win, A_BOLD);
+			waddch(win, '\n'); usleep(delay); wrefresh(win);
+			waddch(win, '\t'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 'v'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 'g'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(average); c++) {
+				waddch(win, average[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			wattroff(win, A_BOLD);
+			waddch(win, '\n'); usleep(delay); wrefresh(win);
+			waddch(win, '\t'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 't'); usleep(delay); wrefresh(win);
+			waddch(win, 'i'); usleep(delay); wrefresh(win);
+			waddch(win, 'n'); usleep(delay); wrefresh(win);
+			waddch(win, 'g'); usleep(delay); wrefresh(win);
+			waddch(win, 's'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(ratings); c++) {
+				waddch(win, ratings[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			// End line
+			waddch(win, '\n');
+			box(win, 0, 0); // Redraw window border with correct colour
+			wrefresh(win);
+			line_count++;
+
+		}
+	}
+
+	line_count = getcury(win);
+	mvwaddch(win, line_count+1,2, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '\n'); usleep(delay); wrefresh(win);
+	pclose(output);
+	sleep(2);
+	output = popen(breweries, "r"); // Read from command pipe
+
+	mvwaddstr(win, getcury(win)+1, 1, "Top 5 breweries: \n");
+	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
+		json_object * jobj = json_tokener_parse(jsonString);
+		// Check if we have valid JSON objects before proceding
+		if(jobj != NULL) {
+			enum json_type type;
+			char outputString[400];
+			char *brewery = NULL;
+			char *average = NULL;
+			char *ratings = NULL;
+			// Set checkin variables from JSON objects
+			json_object_object_foreach(jobj, key, val) {
+				if(!strcmp("brewery", key)) {
+					brewery = json_object_get_string(val);
+				}
+				else if(!strcmp("average", key)) {
+					average = json_object_get_string(val);
+				}
+				else if(!strcmp("ratings", key)) {
+					ratings = json_object_get_string(val);
+				}
+			}
+			// wattron(win, A_BOLD | COLOR_PAIR(1));
+			mvwaddch(win, getcury(win),1, ' ');
+			wattroff(win, A_BOLD);
+			waddch(win, 'B'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			waddch(win, 'w'); usleep(delay); wrefresh(win); 
+			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			waddch(win, 'r'); usleep(delay); wrefresh(win); 
+			waddch(win, 'y'); usleep(delay); wrefresh(win); 
+			waddch(win, ' '); usleep(delay); wrefresh(win); 
+			wattron(win, A_BOLD);
+			waddstr(win, brewery); usleep(delay); wrefresh(win);
+			wattroff(win, A_BOLD);
+			waddch(win, '\n'); usleep(delay); wrefresh(win);
+			waddch(win, '\t'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 'v'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 'g'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(average); c++) {
+				waddch(win, average[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			wattroff(win, A_BOLD);
+			waddch(win, '\n'); usleep(delay); wrefresh(win);
+			waddch(win, '\t'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'a'); usleep(delay); wrefresh(win);
+			waddch(win, 't'); usleep(delay); wrefresh(win);
+			waddch(win, 'i'); usleep(delay); wrefresh(win);
+			waddch(win, 'n'); usleep(delay); wrefresh(win);
+			waddch(win, 'g'); usleep(delay); wrefresh(win);
+			waddch(win, 's'); usleep(delay); wrefresh(win);
+			waddch(win, ' '); usleep(delay); wrefresh(win);
+
+			wattron(win, A_BOLD);
+			for(c = 0; c < strlen(ratings); c++) {
+				waddch(win, ratings[c]);
+				usleep(delay);
+				wrefresh(win);
+			}
+			// End line
+			waddch(win, '\n');
+			box(win, 0, 0); // Redraw window border with correct colour
+			wrefresh(win);
+			line_count++;
+
+		}
+	}
+
+	line_count = getcury(win);
+	mvwaddch(win, line_count+1,2, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	waddch(win, '.'); usleep(delay); wrefresh(win);
+	pclose(output);
 }
