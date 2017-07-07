@@ -192,6 +192,7 @@ void fetch_updates_main(WINDOW *win) {
 			*/
 			waddstr(win, brewery); usleep(delay); wrefresh(win);
 			waddch(win, ' '); usleep(delay); wrefresh(win);
+			wattron(win, A_BOLD | A_UNDERLINE);
 			for(c = 0; c < strlen(rating); c++) {
 				waddch(win, rating[c]);
 				usleep(delay);
@@ -200,7 +201,7 @@ void fetch_updates_main(WINDOW *win) {
 			if((strlen(beer)+strlen(brewery)+40) > x) {
 				line_count++;
 			}
-			wattroff(win, A_BOLD);
+			wattroff(win, A_BOLD | A_UNDERLINE);
 			if(strlen(comment) > 0) {
 				waddch(win, '\n'); usleep(delay); wrefresh(win);
 				waddch(win, '\t'); usleep(delay); wrefresh(win);
