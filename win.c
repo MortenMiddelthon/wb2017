@@ -103,6 +103,11 @@ void fetch_updates_main(WINDOW *win) {
 
 	wclear(win); // Clear text from window
 
+	// Print some Russian....
+	mvwaddstr(win, 1,1, 'Pivo dlya lyudey!\n');
+	wrefresh(win);
+	sleep(3);
+
 	// Read JSON output one line at a time
 	line_count = 1;
 	mvwaddch(win, 1,1, ' ');
