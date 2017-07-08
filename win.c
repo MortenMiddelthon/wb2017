@@ -30,8 +30,8 @@ int main() {
 	attron(A_BOLD | COLOR_PAIR(1));
 
 	refresh();
-	main_window = create_newwin(row, col*0.7, 0,0);
-	side_window = create_newwin(row, col*0.3-1, 0, (col*0.7)+1);
+	main_window = create_newwin(row, col*0.6, 0,0);
+	side_window = create_newwin(row, col*0.4-1, 0, (col*0.7)+1);
 	print_in_window(side_window, 1, 2, 20, "WB2017");
 	while(1) {
 		fetch_updates_main(main_window);
@@ -278,7 +278,9 @@ void fetch_updates_side(WINDOW *win) {
 
 	// Read JSON output one line at a time
 	line_count = 1;
+	wattron(win, A_BOLD| A_UNDERLINE);
 	mvwaddstr(win, 1,1, "Top 5 beers: \n");
+	wattroff(win, A_UNDERLINE);
 	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		// Check if we have valid JSON objects before proceding
@@ -365,7 +367,9 @@ void fetch_updates_side(WINDOW *win) {
 	sleep(2);
 	output = popen(breweries, "r"); // Read from command pipe
 
+	wattron(win, A_BOLD| A_UNDERLINE);
 	mvwaddstr(win, getcury(win)+1, 1, "Top 5 breweries: \n");
+	wattroff(win, A_UNDERLINE);
 	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
 		// Check if we have valid JSON objects before proceding
