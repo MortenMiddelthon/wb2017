@@ -32,7 +32,7 @@ int main() {
 	refresh();
 	main_window = create_newwin(row, col*0.7, 0,0);
 	side_window = create_newwin(row, col*0.3-1, 0, (col*0.7)+1);
-	print_in_window(side_window, 1, 2, 20, "Suppe");
+	print_in_window(side_window, 1, 2, 20, "WB2017");
 	while(1) {
 		fetch_updates_main(main_window);
 		sleep(1);
@@ -49,10 +49,8 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 	wattron(local_win, A_BOLD | COLOR_PAIR(1));
 
 	local_win = newwin(height, width, starty, startx);
-	box(local_win, 0 , 0);		/* 0, 0 gives default characters 
-					 * for the vertical and horizontal
-					 * lines			*/
-	wrefresh(local_win);		/* Show that box 		*/
+	//box(local_win, 0 , 0);
+	wrefresh(local_win);
 
 	return local_win;
 }
@@ -79,7 +77,7 @@ void print_in_window(WINDOW *win, int starty, int startx, int width, char *strin
 	x = startx + (int)temp;
 	*/
 	mvwprintw(win, y, x, "%s", string);
-	box(win, 0, 0);
+	//box(win, 0, 0);
 	wrefresh(win);
 }
 
@@ -96,7 +94,7 @@ void fetch_updates_main(WINDOW *win) {
 	// Set colours and font type
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
-	box(win, 0, 0); // Redraw window border with correct colour
+	//box(win, 0, 0); // Redraw window border with correct colour
 
 	// Get window dimensions
 	getmaxyx(win, y , x);
@@ -114,31 +112,31 @@ void fetch_updates_main(WINDOW *win) {
 		if(jobj != NULL) {
 			enum json_type type;
 			char outputString[400];
-			char *username = NULL;
-			char *beer = NULL;
-			char *brewery = NULL;
-			char *comment = NULL;
-			char *rating = NULL;
-			char *date = NULL;
+			char username[256];
+			char beer[256];
+			char brewery[256];
+			char comment[256];
+			char rating[256];
+			char date[256];
 			// Set checkin variables from JSON objects
 			json_object_object_foreach(jobj, key, val) {
 				if(!strcmp("user_name", key)) {
-					username = json_object_get_string(val);
+					strcpy(username, json_object_get_string(val));
 				}
 				else if(!strcmp("beer_name", key)) {
-					beer = json_object_get_string(val);
+					strcpy(beer, json_object_get_string(val));
 				}
 				else if(!strcmp("brewery_name", key)) {
-					brewery = json_object_get_string(val);
+					strcpy(brewery, json_object_get_string(val));
 				}
 				else if(!strcmp("checkin_comment", key)) {
-					comment = json_object_get_string(val);
+					strcpy(comment, json_object_get_string(val));
 				}
 				else if(!strcmp("rating", key)) {
-					rating = json_object_get_string(val);
+					strcpy(rating, json_object_get_string(val));
 				}
 				else if(!strcmp("date", key)) {
-					date = json_object_get_string(val);
+					strcpy(date, json_object_get_string(val));
 				}
 			}
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
@@ -233,7 +231,7 @@ void fetch_updates_main(WINDOW *win) {
 			}
 			// End line
 			waddch(win, '\n');
-			box(win, 0, 0); // Redraw window border with correct colour
+			//box(win, 0, 0); // Redraw window border with correct colour
 			wrefresh(win);
 			line_count++;
 
@@ -269,7 +267,7 @@ void fetch_updates_side(WINDOW *win) {
 	// Set colours and font type
 	init_pair(1, COLOR_GREEN, COLOR_BLACK);
 	wattron(win, COLOR_PAIR(1));
-	box(win, 0, 0); // Redraw window border with correct colour
+	//box(win, 0, 0); // Redraw window border with correct colour
 
 	// Get window dimensions
 	getmaxyx(win, y , x);
@@ -287,19 +285,19 @@ void fetch_updates_side(WINDOW *win) {
 		if(jobj != NULL) {
 			enum json_type type;
 			char outputString[400];
-			char *beer = NULL;
-			char *average = NULL;
-			char *ratings = NULL;
+			char beer[256];
+			char average[256];
+			char ratings[256];
 			// Set checkin variables from JSON objects
 			json_object_object_foreach(jobj, key, val) {
 				if(!strcmp("beer", key)) {
-					beer = json_object_get_string(val);
+					strcpy(beer, json_object_get_string(val));
 				}
 				else if(!strcmp("average", key)) {
-					average = json_object_get_string(val);
+					strcpy(average, json_object_get_string(val));
 				}
 				else if(!strcmp("ratings", key)) {
-					ratings = json_object_get_string(val);
+					strcpy(ratings, json_object_get_string(val));
 				}
 			}
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
@@ -350,7 +348,7 @@ void fetch_updates_side(WINDOW *win) {
 			}
 			// End line
 			waddch(win, '\n');
-			box(win, 0, 0); // Redraw window border with correct colour
+			//box(win, 0, 0); // Redraw window border with correct colour
 			wrefresh(win);
 			line_count++;
 
@@ -363,7 +361,6 @@ void fetch_updates_side(WINDOW *win) {
 	waddch(win, '.'); usleep(delay); wrefresh(win);
 	waddch(win, '.'); usleep(delay); wrefresh(win);
 	waddch(win, '.'); usleep(delay); wrefresh(win);
-	waddch(win, '\n'); usleep(delay); wrefresh(win);
 	pclose(output);
 	sleep(2);
 	output = popen(breweries, "r"); // Read from command pipe
@@ -375,19 +372,19 @@ void fetch_updates_side(WINDOW *win) {
 		if(jobj != NULL) {
 			enum json_type type;
 			char outputString[400];
-			char *brewery = NULL;
-			char *average = NULL;
-			char *ratings = NULL;
+			char brewery[256];
+			char average[10];
+			char ratings[20];
 			// Set checkin variables from JSON objects
 			json_object_object_foreach(jobj, key, val) {
 				if(!strcmp("brewery", key)) {
-					brewery = json_object_get_string(val);
+					strcpy(brewery, json_object_get_string(val));
 				}
 				else if(!strcmp("average", key)) {
-					average = json_object_get_string(val);
+					strcpy(average, json_object_get_string(val));
 				}
 				else if(!strcmp("ratings", key)) {
-					ratings = json_object_get_string(val);
+					strcpy(ratings, json_object_get_string(val));
 				}
 			}
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
@@ -441,18 +438,12 @@ void fetch_updates_side(WINDOW *win) {
 			}
 			// End line
 			waddch(win, '\n');
-			box(win, 0, 0); // Redraw window border with correct colour
+			//box(win, 0, 0); // Redraw window border with correct colour
 			wrefresh(win);
 			line_count++;
 
 		}
 	}
 
-	line_count = getcury(win);
-	mvwaddch(win, line_count+1,2, '.'); usleep(delay); wrefresh(win);
-	waddch(win, '.'); usleep(delay); wrefresh(win);
-	waddch(win, '.'); usleep(delay); wrefresh(win);
-	waddch(win, '.'); usleep(delay); wrefresh(win);
-	waddch(win, '.'); usleep(delay); wrefresh(win);
 	pclose(output);
 }
