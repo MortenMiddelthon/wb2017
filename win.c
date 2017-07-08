@@ -31,7 +31,7 @@ int main() {
 
 	refresh();
 	main_window = create_newwin(row, col*0.6, 0,0);
-	side_window = create_newwin(row, col*0.4-1, 0, (col*0.7)+1);
+	side_window = create_newwin(row, col*0.4-1, 0, (col*0.6)+1);
 	print_in_window(side_window, 1, 2, 20, "WB2017");
 	while(1) {
 		fetch_updates_main(main_window);
