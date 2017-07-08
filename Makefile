@@ -15,3 +15,6 @@ clean:
 
 run:
 	./${PROG}
+
+update:
+	git pull
