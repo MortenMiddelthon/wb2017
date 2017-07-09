@@ -14,9 +14,12 @@ void fetch_updates_side(WINDOW *win);
 
 int main() {
 	WINDOW *main_window;
+	WINDOW *main_frame;
 	WINDOW *side_window;
 	WINDOW *side_frame;
-	WINDOW *main_frame;
+	WINDOW *bottom_window;
+	WINDOW *bottom_frame;
+
 	int ch, row, col;
 	char *locale;
 	locale = setlocale(LC_ALL, "");
@@ -34,9 +37,12 @@ int main() {
 	refresh();
 	main_frame = create_newwin(row, col*0.6, 0,0, 1);
 	main_window = create_newwin(row-2, (col*0.6)-2, 1,1, 0);
-	side_frame = create_newwin(row, (col*0.4)-1, 0, (col*0.6)+1, 1);
-	side_window = create_newwin(row-2, (col*0.4)-3, 1, (col*0.6)+2, 0);
-	print_in_window(side_window, 1, 2, 20, "WB2017");
+	side_frame = create_newwin(row - 5, (col*0.4)-1, 0, (col*0.6)+1, 1);
+	side_window = create_newwin(row-7, (col*0.4)-3, 1, (col*0.6)+2, 0);
+	bottom_frame = create_newwin(5, (col*0.4)-1, row-5,  (col*0.6)+1, 1);
+	bottom_window = create_newwin(3, (col*0.4)-3, row-4,  (col*0.6)+2, 0);
+
+	print_in_window(bottom_window, 1, 2, 20, "WB2017");
 	while(1) {
 		fetch_updates_main(main_window);
 		sleep(1);
