@@ -42,10 +42,11 @@ int main() {
 	bottom_frame = create_newwin(5, (col*0.4)-1, row-5,  (col*0.6)+1, 1);
 	bottom_window = create_newwin(3, (col*0.4)-3, row-4,  (col*0.6)+2, 0);
 
-	print_in_window(bottom_window, 1, 2, 20, "WB2017");
 	while(1) {
+		print_in_window(bottom_window, 1, 2, 20, "WB2017: Incoming checkins ....");
 		fetch_updates_main(main_window);
 		sleep(1);
+		print_in_window(bottom_window, 1, 2, 20, "WB2017: Incoming ratings ....");
 		fetch_updates_side(side_window);
 		sleep(10);
 	}
