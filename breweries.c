@@ -9,6 +9,7 @@
 WINDOW *create_newwin(int height, int width, int starty, int startx, int box);
 void print_in_window(WINDOW *win, int starty, int startx, int width, char *string);
 void destroy_win(WINDOW *local_win);
+void fetch_updates_main(WINDOW *win);
 void fetch_updates_side(WINDOW *win);
 
 int main() {
@@ -85,7 +86,7 @@ void fetch_updates_side(WINDOW *win) {
 	int x, y, c, line_count;
 	int delay = 10000; // Delay between printing each character
 	// Where to fetch JSON
-	char beers[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/topbeers";
+	char breweries[] = "/usr/bin/wget -O - -q http://wb.lastfriday.no/json/topbreweries";
 	size_t len = 0;
 	char *jsonString = NULL;
 	enum json_type type;
@@ -98,15 +99,15 @@ void fetch_updates_side(WINDOW *win) {
 
 	// Get window dimensions
 	getmaxyx(win, y , x);
-
-	output = popen(beers, "r"); // Read from command pipe
-
 	wclear(win); // Clear text from window
 
 	// Read JSON output one line at a time
 	line_count = 1;
 	wattron(win, A_BOLD| A_UNDERLINE);
-	mvwaddstr(win, 1,1, "Top 10 beers: \n");
+	output = popen(breweries, "r"); // Read from command pipe
+
+	wattron(win, A_BOLD| A_UNDERLINE);
+	mvwaddstr(win, getcury(win)+1, 1, "Top 10 breweries: \n");
 	wattroff(win, A_UNDERLINE);
 	while( getline(&jsonString, &len, output) != -1 && getcury(win) < y-4) {
 		json_object * jobj = json_tokener_parse(jsonString);
@@ -114,17 +115,17 @@ void fetch_updates_side(WINDOW *win) {
 		if(jobj != NULL) {
 			enum json_type type;
 			char outputString[400];
-			char beer[256];
 			char brewery[256];
-			char average[256];
-			char ratings[256];
+			char country[256];
+			char average[10];
+			char ratings[20];
 			// Set checkin variables from JSON objects
 			json_object_object_foreach(jobj, key, val) {
-				if(!strcmp("beer", key)) {
-					strcpy(beer, json_object_get_string(val));
-				}
-				else if(!strcmp("brewery", key)) {
+				if(!strcmp("brewery", key)) {
 					strcpy(brewery, json_object_get_string(val));
+				}
+				else if(!strcmp("country", key)) {
+					strcpy(country, json_object_get_string(val));
 				}
 				else if(!strcmp("average", key)) {
 					strcpy(average, json_object_get_string(val));
@@ -137,20 +138,27 @@ void fetch_updates_side(WINDOW *win) {
 			mvwaddch(win, getcury(win),1, ' ');
 			wattroff(win, A_BOLD);
 			waddch(win, 'B'); usleep(delay); wrefresh(win);
-			waddch(win, 'e'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win);
+			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			waddch(win, 'w'); usleep(delay); wrefresh(win); 
 			waddch(win, 'e'); usleep(delay); wrefresh(win); 
 			waddch(win, 'r'); usleep(delay); wrefresh(win); 
-			waddch(win, ' '); usleep(delay); wrefresh(win); 
-			wattron(win, A_BOLD);
-			waddstr(win, beer); usleep(delay); wrefresh(win);
-			wattroff(win, A_BOLD);
-			waddch(win, ' '); usleep(delay); wrefresh(win); 
-			waddch(win, 'B'); usleep(delay); wrefresh(win);
-			waddch(win, 'y'); usleep(delay); wrefresh(win);
+			waddch(win, 'y'); usleep(delay); wrefresh(win); 
 			waddch(win, ' '); usleep(delay); wrefresh(win); 
 			wattron(win, A_BOLD);
 			waddstr(win, brewery); usleep(delay); wrefresh(win);
 			wattroff(win, A_BOLD);
+
+			waddch(win, ' '); usleep(delay); wrefresh(win); 
+			waddch(win, 'f'); usleep(delay); wrefresh(win);
+			waddch(win, 'r'); usleep(delay); wrefresh(win); 
+			waddch(win, 'o'); usleep(delay); wrefresh(win); 
+			waddch(win, 'm'); usleep(delay); wrefresh(win); 
+			waddch(win, ' '); usleep(delay); wrefresh(win); 
+			wattron(win, A_BOLD);
+			waddstr(win, country); usleep(delay); wrefresh(win);
+			wattroff(win, A_BOLD);
+
 			waddch(win, '\n'); usleep(delay); wrefresh(win);
 			waddch(win, '\t'); usleep(delay); wrefresh(win);
 			waddch(win, 'a'); usleep(delay); wrefresh(win);
@@ -195,7 +203,5 @@ void fetch_updates_side(WINDOW *win) {
 		}
 	}
 
-	line_count = getcury(win);
-	// waddch(win, '.'); usleep(delay); wrefresh(win);
 	pclose(output);
 }

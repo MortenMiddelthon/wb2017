@@ -7,6 +7,8 @@ CHECKINS_OBJ=checkins.o
 CHECKINS_PROG=checkins
 BEERS_OBJ=beers.o
 BEERS_PROG=beers
+BREWERIES_OBJ=breweries.o
+BREWERIES_PROG=breweries
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -19,6 +21,9 @@ checkins: ${CHECKINS_OBJ}
 
 beers: ${BEERS_OBJ}
 	gcc ${BEERS_PROG}.c -o ${BEERS_PROG} ${LIBS} ${FLAGS}
+
+breweries: ${BREWERIES_OBJ}
+	gcc ${BREWERIES_PROG}.c -o ${BREWERIES_PROG} ${LIBS} ${FLAGS}
 
 clean:
 	rm ${PROG}

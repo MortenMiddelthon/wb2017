@@ -1,6 +1,8 @@
 menu
 win
 checkins
+breweries
+beers
 *.o
 EHLO
 .*swp
