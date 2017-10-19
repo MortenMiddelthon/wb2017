@@ -1,5 +1,6 @@
 menu
 win
-win.o
+checkins
+*.o
 EHLO
 .*swp
