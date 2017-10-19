@@ -162,16 +162,20 @@ void fetch_updates_main(WINDOW *win) {
 			// wattron(win, A_BOLD | COLOR_PAIR(1));
 			mvwaddch(win, getcury(win),0, ' ');
 			wattroff(win, A_BOLD);
+			/* Disable date
 			for(c = 0; c < strlen(date); c++) {
 				waddch(win, date[c]);
 				usleep(delay);
 				wrefresh(win);
 			}
 			waddch(win, ' '); usleep(delay); wrefresh(win);
-			waddch(win, 'U'); usleep(delay); wrefresh(win);
-			waddch(win, 's'); usleep(delay); wrefresh(win);
-			waddch(win, 'e'); usleep(delay); wrefresh(win); 
+			*/
+			waddch(win, 'K'); usleep(delay); wrefresh(win);
+			waddch(win, 'o'); usleep(delay); wrefresh(win);
+			waddch(win, 'm'); usleep(delay); wrefresh(win); 
 			waddch(win, 'r'); usleep(delay); wrefresh(win); 
+			waddch(win, 'a'); usleep(delay); wrefresh(win); 
+			waddch(win, 'd'); usleep(delay); wrefresh(win); 
 			waddch(win, ' '); usleep(delay); wrefresh(win); 
 			wattron(win, A_BOLD);
 			for(c = 0; c < strlen(username); c++) {
