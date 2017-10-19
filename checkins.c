@@ -31,7 +31,7 @@ int main() {
 
 	refresh();
 	main_frame = create_newwin(row, col, 0,0, 1);
-	main_window = create_newwin(row-2, (col*)-2, 1,1, 0);
+	main_window = create_newwin(row-2, col-2, 1,1, 0);
 
 	while(1) {
 		fetch_updates_main(main_window);
